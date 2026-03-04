@@ -1,5 +1,6 @@
 package com.example;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -13,17 +14,16 @@ public class Piece {
     private final boolean color;
     private BufferedImage img;
     
-    public Piece(boolean isWhite, String img_file) {
-        this.color = isWhite;
-         
-        try {
-            if (this.img == null) {
-                this.img = ImageIO.read(new File(System.getProperty("user.dir")+img_file));
-            }
-          } catch (IOException e) {
-            System.out.println("File not found: " + e.getMessage());
-          }
-    }
+public Piece(boolean isWhite, String img_file) {
+    this.color = isWhite;
+    this.img = null;
+     
+    try {
+        this.img = ImageIO.read(new File(System.getProperty("user.dir")+img_file));
+      } catch (IOException e) {
+        System.out.println("File not found: " + e.getMessage());
+      }
+}
     
     
 
@@ -39,10 +39,12 @@ public class Piece {
     //precondition: g and currentSquare must be on-null valid objects.
     //postcondition: the image stored in the img property of this object is drawn to the screen.
     public void draw(Graphics g, Square currentSquare) {
-        int x = currentSquare.getX();
-        int y = currentSquare.getY();
-        
-        g.drawImage(this.img, x, y, null);
+        if (this.img != null) {
+            int x = currentSquare.getX()+5;
+            int y = currentSquare.getY()+5;
+            
+            g.drawImage(this.img, x, y, null);
+        }
     }
     
     
@@ -50,7 +52,39 @@ public class Piece {
     //return a list of every square that is "controlled" by this piece. A square is controlled
     //if the piece capture into it legally.
     public ArrayList<Square> getControlledSquares(Square[][] board, Square start) {
-     return null;
+        ArrayList<Square> moves = new ArrayList<>();
+        int startRow = start.getRow();
+        int startCol = start.getCol();
+        
+        if (startRow > 0) {
+            Square s = board[startRow - 1][startCol];
+            if (!s.isOccupied() || (s.isOccupied() && s.getOccupyingPiece().getColor() != this.getColor())) {
+                moves.add(s);
+            }
+        }
+        
+        if (startRow < 7) {
+            Square s = board[startRow + 1][startCol];
+            if (!s.isOccupied() || (s.isOccupied() && s.getOccupyingPiece().getColor() != this.getColor())) {
+                moves.add(s);
+            }
+        }
+        
+        if (startCol > 0) {
+            Square s = board[startRow][startCol - 1];
+            if (!s.isOccupied() || (s.isOccupied() && s.getOccupyingPiece().getColor() != this.getColor())) {
+                moves.add(s);
+            }
+        }
+        
+        if (startCol < 7) {
+            Square s = board[startRow][startCol + 1];
+            if (!s.isOccupied() || (s.isOccupied() && s.getOccupyingPiece().getColor() != this.getColor())) {
+                moves.add(s);
+            }
+        }
+        
+        return moves;
     }
     
 
@@ -61,6 +95,12 @@ public class Piece {
     //please note that your piece must have some sort of logic. Just being able to move to every square on the board is not
     //going to score any points.
     public ArrayList<Square> getLegalMoves(Board b, Square start){
-    	return null;
+        ArrayList<Square> legalMoves = new ArrayList<>();
+        for(Square s: getControlledSquares(b.getSquareArray(), start)){
+            // if(!s.isOccupied() || s.getOccupyingPiece().getColor() != this.getColor()) {
+                 legalMoves.add(s);
+            //}
+        }
+        return legalMoves;
     }
 }
